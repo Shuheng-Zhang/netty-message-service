@@ -37,22 +37,35 @@ public class NioHttpHandler extends SimpleChannelInboundHandler<FullHttpRequest>
 
                 final var result = ApiService.handleGetRequest(path, params);
 
-                this.handleJsonResposne(
-                        ctx,
-                        request,
-                        JSONUtil.toJsonStr(Map.of("code", 0, "msg", "OK", "data", result)));
+                Optional.ofNullable(result)
+                        .ifPresentOrElse(
+                                r -> this.handleJsonResponse(
+                                        ctx,
+                                        HttpResponseStatus.OK,
+                                        request,
+                                        JSONUtil.toJsonStr(Map.of("code", 0, "msg", "OK", "data", r))
+                                ),
+                                () -> this.handleJsonResponse(
+                                        ctx,
+                                        HttpResponseStatus.BAD_REQUEST,
+                                        request,
+                                        JSONUtil.toJsonStr(Map.of("code", 400, "msg", "BAD_REQUEST", "data", "NO SUCH API"))
+                                )
+                        );
             }
             case "POST" -> {
                 final var reqBody = this.parseHttpBodyPayloadAsJsonStr(request);
                 LOGGER.info("POST Request => [{}], [{}]", uri, reqBody);
 
-                this.handleJsonResposne(
+                this.handleJsonResponse(
                         ctx,
+                        HttpResponseStatus.OK,
                         request,
                         JSONUtil.toJsonStr(Map.of("code", 0, "msg", "OK", "data", JSONNull.NULL)));
             }
-            default -> this.handleJsonResposne(
+            default -> this.handleJsonResponse(
                     ctx,
+                    HttpResponseStatus.BAD_REQUEST,
                     request,
                     JSONUtil.toJsonStr(Map.of("code", 400, "msg", "BAD REQUEST", "data", JSONNull.NULL))
             );
@@ -66,13 +79,13 @@ public class NioHttpHandler extends SimpleChannelInboundHandler<FullHttpRequest>
     }
 
 
-
     private String parseHttpBodyPayloadAsJsonStr(final FullHttpRequest request) {
         final var jsonBuf = request.content();
         return jsonBuf.toString(StandardCharsets.UTF_8);
     }
 
-    private void handleJsonResposne(final ChannelHandlerContext ctx,
+    private void handleJsonResponse(final ChannelHandlerContext ctx,
+                                    final HttpResponseStatus httpResponseStatus,
                                     final FullHttpRequest request,
                                     final String responseJsonStr) {
         final var responseJsonBytes = Optional.ofNullable(responseJsonStr)
@@ -81,7 +94,7 @@ public class NioHttpHandler extends SimpleChannelInboundHandler<FullHttpRequest>
 
         final var response = new DefaultFullHttpResponse(
                 HttpVersion.HTTP_1_1,
-                HttpResponseStatus.OK,
+                httpResponseStatus,
                 Unpooled.wrappedBuffer(responseJsonBytes)
         );
         response.headers()

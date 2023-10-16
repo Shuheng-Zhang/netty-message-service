@@ -249,12 +249,12 @@ public class NioWebSocketHandler extends SimpleChannelInboundHandler<Object> {
                     }
 
                     // 群发消息
-                    ChannelSupervise.broadcastMsg(ctx.channel().id(), new TextWebSocketFrame(msgText));
+                    ChannelSupervise.broadcastMsg(ctx.channel().id(), msgText);
                     return;
                 }
 
                 // 默认群发文本数据
-                ChannelSupervise.broadcastMsg(ctx.channel().id(), new TextWebSocketFrame(msgText));
+                ChannelSupervise.broadcastMsg(ctx.channel().id(), msgText);
             } catch (Exception e) {
                 LOGGER.error(e, "Error Occurred");
             }
