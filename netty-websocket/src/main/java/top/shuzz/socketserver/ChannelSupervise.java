@@ -9,6 +9,7 @@ import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.util.concurrent.GlobalEventExecutor;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -133,9 +134,9 @@ public class ChannelSupervise {
      * <p>该消息将会被排除源消息通道</p>
      *
      * @param sourceId 消息的源通道ID
-     * @param frame    消息帧
+     * @param msgText  消息文本
      */
-    public static void broadcastMsg(final ChannelId sourceId, TextWebSocketFrame frame) {
+    public static void broadcastMsg(final ChannelId sourceId, final String msgText) {
         // LOGGER.info("SOCKET_GROUP = {}", JSONUtil.toJsonPrettyStr(SOCKET_GROUP.stream().map(ch -> ch.id().asLongText()).toList()));
 
         SOCKET_GROUP.stream()
@@ -144,21 +145,25 @@ public class ChannelSupervise {
                 // 过滤未加入用户组的通道
                 .filter(ch -> USER_MAP.contains(ch.id().asLongText()))
                 // 推送消息
-                .forEach(ch -> ch.writeAndFlush(frame));
+                .forEach(ch -> ch.writeAndFlush(new TextWebSocketFrame(msgText)));
     }
 
     /**
      * 输出当前用户及通道的管理数据信息
      */
     public static WebSocketCountStatVo currentConnections() {
-        LOGGER.debug("");
+        /*LOGGER.debug("");
         LOGGER.debug("================================ Current Connection(s) Info ================================");
         LOGGER.debug("SOCKET_GROUP: {}", SOCKET_GROUP.size());
         LOGGER.debug(" CHANNEL_MAP: {}", CHANNEL_MAP.size());
         LOGGER.debug("    USER_MAP: {}", USER_MAP.size());
         LOGGER.debug("================================ Current Connection(s) Info ================================");
-        LOGGER.debug("");
+        LOGGER.debug("");*/
 
         return new WebSocketCountStatVo(SOCKET_GROUP.size(), CHANNEL_MAP.size(), USER_MAP.size());
+    }
+
+    public static List<String> currentUsers() {
+        return USER_MAP.keySet().stream().toList();
     }
 }
