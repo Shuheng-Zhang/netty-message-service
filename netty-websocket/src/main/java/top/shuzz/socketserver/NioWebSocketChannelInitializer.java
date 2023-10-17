@@ -8,6 +8,7 @@ import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
 
 /**
+ * WebSocket 信道初始化器
  * @author heng
  * @since 2023/6/21
  */

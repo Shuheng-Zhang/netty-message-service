@@ -3,6 +3,7 @@ package top.shuzz.socketserver;
 import java.io.Serializable;
 
 /**
+ * WebSocket 计数
  * @author heng
  * @since 2023/6/24
  */
