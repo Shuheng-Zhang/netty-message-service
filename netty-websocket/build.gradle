@@ -27,7 +27,10 @@ jar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
     manifest {
-        attributes "Main-Class": "top.shuzz.AppMain"
+        attributes (
+                // "Class-Path": configurations.compile.collect { it.getName() }.join(' '),
+                "Main-Class": "top.shuzz.AppMain",
+        )
     }
 
     from {
